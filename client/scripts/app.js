@@ -14,7 +14,7 @@ app.send = function (message) {
     type: 'POST',
     // data: JSON.stringify(message),
     data: message,
-
+    crossDomain: true,
     contentType: 'application/json',
     success: function (data) {
       console.log('chatterbox: Message sent');
@@ -68,7 +68,9 @@ app.renderMessage = function (message) {
   		$('.dropdown-content').append($('<a href="#">')).html(JSON.stringify(message.roomname));
   	}
   }
-  $('#chats').append($message);
+  if (message.text !== undefined && !message.text.includes('<script>')){
+    $('#chats').append($message);
+  }
   // $('#main').prepend($username); 
 };
 
@@ -84,12 +86,32 @@ app.handleUsernameClick = function () {
   // });
 };
 
-app.handleSubmit = function() {
+// app.handleSubmit = function() {
+//   // Take message from input box
+//   // Call app.send
+//   var message = {
+//     username: window.location.search.slice(10),
+//     text: $('.messageText').val(), //come back to this later
+//     roomname: 'lobby' //change this later
+//   };
+//   console.log(message.text);
+//   app.send(JSON.stringify(message));
+//   preventDefault();
+
+// };
+app.handleSubmit = function(event) {
   // Take message from input box
   // Call app.send
-  
-};
+  var message = {
+    username: window.location.search.slice(10),
+    text: $('.messageText').val(), //come back to this later
+    roomname: 'lobby' //change this later
+  };
+  console.log("hello");
+  app.send(JSON.stringify(message));
+  event.preventDefault();
 
+};
 app.handleData = function(data) {
   var messageArr = data.results; //array of messages
   //break down into each message
@@ -104,38 +126,42 @@ app.handleData = function(data) {
 };
 
 $(document).ready(function() {
-    
-  $('#main').on('click', '.username', app.handleUsernameClick);
+  app.fetch('http://parse.sfm6.hackreactor.com/chatterbox/classes/messages');
+  
   $('#main').on('click', '.username', function() {
     app.handleUsernameClick();
     //console.log('got here');
   });
 
 
-  $('#send').on('submit', '.submit', function() {
-    app.handleSubmit();
-    console.log('got here');
-  });
-  // app.fetch('http://parse.sfm6.hackreactor.com/', app.renderMessage);
-  
-
-  
-  // $(window).load(function() {
-  //   setInterval(function() {
-  //     app.fetch('http://parse.sfm6.hackreactor.com/chatterbox/classes/messages');
-  //   }, 5000);
+  // $('#send').on('submit', '.submit', function(e) {
+  //   e.preventDefault();
+  //   alert('hello');
+  //   app.handleSubmit();
   // });
 
+  // $('#send').on('submit', '.submit', function() {
+  //   app.handleSubmit();
+  // });
+
+  $('#send').on('submit', app.handleSubmit);
+
+  
+
+  setInterval(function() {
+    app.fetch('http://parse.sfm6.hackreactor.com/chatterbox/classes/messages');
+  }, 5000);
 
 
-var message = {
-          username: 'Tiffany',
-          text: 'did it work?',
-          roomname: 'blah'
-        };
+
+// var message = {
+//           username: 'Tiffany',
+//           text: 'did it work?',
+//           roomname: 'blah'
+//         };
   
   // app.send(message);
-  app.fetch('http://parse.sfm6.hackreactor.com/chatterbox/classes/messages');
+  // app.fetch('http://parse.sfm6.hackreactor.com/chatterbox/classes/messages');
   // var message = {
   //         username: 'Mel Brooks',
   //         text: 'It\'s good to be the king',
@@ -143,5 +169,5 @@ var message = {
   //       };
   // app.send(JSON.stringify(message));
 });
-console.log(rooms);
+// console.log(rooms);
 
