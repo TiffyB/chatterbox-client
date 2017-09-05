@@ -6,7 +6,9 @@
     <link rel="stylesheet" href="styles/styles.css">
 
     <!-- dependencies -->
+    <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/backbone/backbone.js"></script>
     <script>
       // YOU DO NOT NEED TO EDIT THIS CODE
       if (!/(&|\?)username=/.test(window.location.search)) {
@@ -26,7 +28,17 @@
     <div id="main">
       <h1>chatterbox</h1>
       <!-- Your HTML goes here! -->
+      <div id="roomSelect">
+        <select>
+          <option value="new room">New Room...</option>
+        </select>
+      </div>
+      <form action="#" id="send" method="post">
+        <input type="text" name="text" value="">
+        <input type="submit">
+      </form>
     </div>
     <div id="chats"></div>
+
   </body>
 </html>
