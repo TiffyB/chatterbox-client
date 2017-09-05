@@ -3,13 +3,15 @@
 var app = {
   chosenRoom: undefined,
 	rooms: [],
+  friends: [],
 	messages: [],
 	mostRecentID: "0",
 	mostRecentTime: "",
+  newRoom: "lobby",
 	server: 'http://parse.sfm6.hackreactor.com/chatterbox/classes/messages',
 	dataQuery: "",
 	init: function() {
-		$('#main').on('click', '.username', app.handleUsernameClick);
+		$('#chats').on('click', '.username', app.handleUsernameClick);
 		$('#send').on('submit', app.handleSubmit);
     $('#roomSelect').change(app.switchRoom);
 		app.fetch(app.server);
@@ -62,10 +64,13 @@ app.clearMessages = function() {
 };
 
 app.renderMessage = function(message) {
-  var $username = $('<div>').addClass('username').html(message.username);
+  var $username = $('<div>').addClass('username').text(message.username);
   var $text = $('<div>').html(`${message.text}`);
   var $roomname = $('<div>').addClass('roomname').text(message.roomname);
   var $message = $('<div>').addClass('message').append($username, $text, $roomname);
+  if (app.friends.includes(message.username)) {
+    $message.addClass('friend');
+  }
   if (message.text !== undefined && !message.text.includes('<') ) {
     $('#chats').append($message);
   }
@@ -86,7 +91,13 @@ app.renderRoom = function(roomname) {
 };
 
 app.handleUsernameClick = function(event) {
+  var user = $(this).text();
 	console.log('handle username');
+  console.log(user);
+  app.friends.push(user);
+  $('.message').filter(function(item) {
+    return $('.username', this).text() === user;
+  }).addClass('friend');
 	event.preventDefault();
 };
 
@@ -108,12 +119,12 @@ app.handleData = function(data) {
 
 app.handleSubmit = function(event) {
 	var username = window.location.search.slice(10);
-	var roomname = "lobby";
+	// var roomname = "lobby";
 	var text = $('input[name="text"]').val();
 	var message = {
 		username: username,
 		text: text,
-		roomname: roomname
+		roomname: app.chosenRoom || "lobby"
 	};
 	app.send(JSON.stringify(message));
   var text = $('input[name="text"]').val(""); //this erases what was previously in the input
@@ -123,10 +134,18 @@ app.handleSubmit = function(event) {
 app.switchRoom = function(event) {
   var chosenRoom = $(this).val();
   app.chosenRoom = chosenRoom;
-  console.log(app.chosenRoom);
   if (chosenRoom === "All Messages") {
-    console.log('got here');
+    app.chosenRoom = undefined;
     $('#chats').find('.message').show();
+  } else if (chosenRoom === "New Room") {
+    app.newRoom = prompt('Enter new room name: ')
+    app.chosenRoom = app.newRoom;
+    $('.message').filter(function(item) {
+      return $('.roomname', this).text() === app.chosenRoom
+    }).show();
+    $('.message').filter(function(item) {
+      return $('.roomname', this).text() !== app.chosenRoom
+    }).hide();
   } else {
     $('.message').filter(function(item) {
       return $('.roomname', this).text() === app.chosenRoom
