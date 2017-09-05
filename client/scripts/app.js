@@ -1,23 +1,22 @@
 // YOUR CODE HERE:
 
 var app = {
+  chosenRoom: undefined,
 	rooms: [],
 	messages: [],
 	mostRecentID: "0",
 	mostRecentTime: "",
-	numRooms: 0,
-	$send: $('#send'),
 	server: 'http://parse.sfm6.hackreactor.com/chatterbox/classes/messages',
 	dataQuery: "",
 	init: function() {
 		$('#main').on('click', '.username', app.handleUsernameClick);
 		$('#send').on('submit', app.handleSubmit);
+    $('#roomSelect').change(app.switchRoom);
 		app.fetch(app.server);
 		setInterval(function() {
 			app.fetch(app.server)
 		}, 3000);
 	}
-
 };
 
 app.send = function(message){
@@ -63,19 +62,27 @@ app.clearMessages = function() {
 };
 
 app.renderMessage = function(message) {
-	var $username = $('<div>').addClass('username').html(message.username);
-	var $text = $('<div>').html(`${message.text}`);
-	var $roomname = $('<div>').html(message.roomname);
-	var $message = $('<div>').addClass('message').append($username, $text, $roomname);
-	if (message.text !== undefined && !message.text.includes('<') ) {
-		$('#chats').append($message);
-	}
-	// $('#main').append($username);
+  var $username = $('<div>').addClass('username').html(message.username);
+  var $text = $('<div>').html(`${message.text}`);
+  var $roomname = $('<div>').addClass('roomname').text(message.roomname);
+  var $message = $('<div>').addClass('message').append($username, $text, $roomname);
+  if (message.text !== undefined && !message.text.includes('<') ) {
+    $('#chats').append($message);
+  }
+  if (app.chosenRoom !== undefined) { //display all messages
+    $('.message').filter(function(item) {
+      return $('.roomname', this).text() === app.chosenRoom
+    }).show();
+    $('.message').filter(function(item) {
+      return $('.roomname', this).text() !== app.chosenRoom
+    }).hide();
+    // $('#main').append($username);
+  } 
 };
 
 app.renderRoom = function(roomname) {
-	var $room = $('<option>').val(roomname).html(roomname);
-	$('#roomSelect').find('select').append($room);
+	var $room = $('<option>').val(roomname).text(roomname);
+	$('#roomSelect').append($room);
 };
 
 app.handleUsernameClick = function(event) {
@@ -84,8 +91,8 @@ app.handleUsernameClick = function(event) {
 };
 
 app.handleData = function(data) {
-  	if(data.results[0].objectId !== app.mostRecentID) {
-  		app.clearMessages();
+  if(data.results[0].objectId !== app.mostRecentID) {
+  	app.clearMessages();
 		app.messages = data.results;
 		app.mostRecentID = data.results[0].objectId;
 		app.clearMessages();
@@ -97,7 +104,7 @@ app.handleData = function(data) {
 			app.renderMessage(app.messages[i]);
 		}
 	}	
-}
+};
 
 app.handleSubmit = function(event) {
 	var username = window.location.search.slice(10);
@@ -107,9 +114,27 @@ app.handleSubmit = function(event) {
 		username: username,
 		text: text,
 		roomname: roomname
-	}
+	};
 	app.send(JSON.stringify(message));
+  var text = $('input[name="text"]').val(""); //this erases what was previously in the input
 	event.preventDefault();
+};
+
+app.switchRoom = function(event) {
+  var chosenRoom = $(this).val();
+  app.chosenRoom = chosenRoom;
+  console.log(app.chosenRoom);
+  if (chosenRoom === "All Messages") {
+    console.log('got here');
+    $('#chats').find('.message').show();
+  } else {
+    $('.message').filter(function(item) {
+      return $('.roomname', this).text() === app.chosenRoom
+    }).show();
+    $('.message').filter(function(item) {
+      return $('.roomname', this).text() !== app.chosenRoom
+    }).hide();
+  }
 };
 
 $('document').ready(function(){
