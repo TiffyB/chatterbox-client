@@ -1,5 +1,6 @@
 // YOUR CODE HERE:
 
+
 var app = {
   chosenRoom: undefined,
 	rooms: [],
