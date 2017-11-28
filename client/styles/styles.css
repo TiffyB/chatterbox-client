@@ -73,6 +73,16 @@ form input[type=text] {
     background-color: #ddd;
 }
 
+.message {
+    background-color: #eee;
+    border-width: 1px 1px 0 1px;
+    border-style: solid;
+    border-color: #eee;
+    margin-bottom: 3px;
+    padding: 2px;
+    width: 500px;
+}
+
 .spinner {
     float: right;
     height: 46px;
